@@ -21,6 +21,8 @@ class _BuatDataState extends State<BuatData> {
   ProgressDialog pr;
   List<Object> images = List<Object>();
   Future<File> _imageFile;
+  File _image;
+  File _image2;
 
   TextEditingController tf_what = new TextEditingController();
   TextEditingController tf_when = new TextEditingController();
@@ -29,18 +31,6 @@ class _BuatDataState extends State<BuatData> {
   TextEditingController tf_why = new TextEditingController();
   TextEditingController tf_how = new TextEditingController();
   TextEditingController tf_judul = new TextEditingController();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    setState(() {
-      images.add("Add Image");
-      images.add("Add Image");
-      images.add("Add Image");
-      images.add("Add Image");
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +142,70 @@ class _BuatDataState extends State<BuatData> {
                       border: new OutlineInputBorder(
                           borderRadius: new BorderRadius.circular(20.0))),
                 ),
-                buildGridView(),
+                //buildGridView(),
+                new Container(
+                  margin: EdgeInsets.only(top: 20),
+                  alignment: Alignment.center,
+                  child: Column(
+                    children: <Widget>[
+                      Stack(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: _image == null
+                                ? NetworkImage(
+                                    'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                : FileImage(_image),
+                            radius: 50.0,
+                          ),
+                          InkWell(
+                            onTap: _onAlertPress,
+                            child: Container(
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(40.0),
+                                    color: Colors.black),
+                                margin: EdgeInsets.only(left: 70, top: 70),
+                                child: Icon(
+                                  Icons.photo_camera,
+                                  size: 25,
+                                  color: Colors.white,
+                                )),
+                          ),
+                        ],
+                      ),
+                      Text('Tambahkan Gambar',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                           Stack(
+                        children: <Widget>[
+                          CircleAvatar(
+                            backgroundImage: _image2 == null
+                                ? NetworkImage(
+                                    'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                : FileImage(_image2),
+                            radius: 50.0,
+                          ),
+                          InkWell(
+                            onTap: _onAlertPress2,
+                            child: Container(
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(40.0),
+                                    color: Colors.black),
+                                margin: EdgeInsets.only(left: 70, top: 70),
+                                child: Icon(
+                                  Icons.photo_camera,
+                                  size: 25,
+                                  color: Colors.white,
+                                )),
+                          ),
+                        ],
+                      ),
+                      Text('Tambahkan Gambar',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 30),
                 RaisedButton(
                   onPressed: () {
@@ -184,77 +237,99 @@ class _BuatDataState extends State<BuatData> {
     );
   }
 
-  Widget buildGridView() {
-    return GridView.count(
-      shrinkWrap: true,
-      crossAxisCount: 2 * 2,
-      childAspectRatio: 1,
-      children: List.generate(images.length, (index) {
-        if (images[index] is ImageUploadModel) {
-          ImageUploadModel uploadModel = images[index];
-          return Card(
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: <Widget>[
-                Image.file(
-                  uploadModel.imageFile,
-                  width: 300,
-                  height: 300,
+  void _onAlertPress() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Column(
+                  children: <Widget>[
+                    Text('Galeri'),
+                  ],
                 ),
-                Positioned(
-                  right: 5,
-                  top: 5,
-                  child: InkWell(
-                    child: Icon(
-                      Icons.remove_circle,
-                      size: 20,
-                      color: Colors.red,
-                    ),
-                    onTap: () {
-                      setState(() {
-                        images.replaceRange(index, index + 1, ['Add Image']);
-                      });
-                    },
-                  ),
+                onPressed: getGalleryImage,
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Column(
+                  children: <Widget>[
+                    Text('Kamera'),
+                  ],
                 ),
-              ],
-            ),
+                onPressed: getCameraImage,
+              ),
+            ],
           );
-        } else {
-          return Card(
-            child: IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                _onAddImageClick(index);
-              },
-            ),
+        });
+  }
+  void _onAlertPress2() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Column(
+                  children: <Widget>[
+                    Text('Galeri'),
+                  ],
+                ),
+                onPressed: getGalleryImage2,
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Column(
+                  children: <Widget>[
+                    Text('Kamera'),
+                  ],
+                ),
+                onPressed: getCameraImage2,
+              ),
+            ],
           );
-        }
-      }),
-    );
+        });
   }
 
-  Future _onAddImageClick(int index) async {
+  Future getCameraImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+
     setState(() {
-      _imageFile = ImagePicker.pickImage(source: ImageSource.gallery);
-      getFileImage(index);
+      _image = image;
+      Navigator.pop(context);
     });
   }
 
-  void getFileImage(int index) async {
-//    var dir = await path_provider.getTemporaryDirectory();
+  Future getGalleryImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-    _imageFile.then((file) async {
-      setState(() {
-        ImageUploadModel imageUpload = new ImageUploadModel();
-        imageUpload.isUploaded = false;
-        imageUpload.uploading = false;
-        imageUpload.imageFile = file;
-        imageUpload.imageUrl = '';
-        images.replaceRange(index, index + 1, [imageUpload]);
-      });
+    setState(() {
+      _image = image;
+      Navigator.pop(context);
     });
   }
+
+Future getCameraImage2() async {
+    var image2 = await ImagePicker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      _image2 = image2;
+      Navigator.pop(context);
+    });
+  }
+
+  Future getGalleryImage2() async {
+    var image2 = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image2 = image2;
+      Navigator.pop(context);
+    });
+  }
+
 
   void getDataConroller() {
     AlertDialog alertDialog = new AlertDialog(
@@ -276,22 +351,21 @@ class _BuatDataState extends State<BuatData> {
 
   Uri apiUrl = Uri.parse(
       'http://wardes.pasamanbaratkab.go.id/api_android/post_data.php');
-
-  Future<Map<String, dynamic>> _uploadImage() async {
+/*
+  Future<Map<String, dynamic>> _uploadImage(File image) async {
     setState(() {
       pr.show();
     });
 
-    /* final mimeTypeData =
+    final mimeTypeData =
         lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
-*/
+
     // Intilize the multipart request
     final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
 
     // Attach the file in the request
-    /* final file = await http.MultipartFile.fromPath(
-        'half_body_image', image.path,
-        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));*/
+    final file = await http.MultipartFile.fromPath('gbr1', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
     // Explicitly pass the extension of the image with request body
     // Since image_picker has some bugs due which it mixes up
     // image extension with file name like this filenamejpge
@@ -300,20 +374,71 @@ class _BuatDataState extends State<BuatData> {
 
 //    imageUploadRequest.fields['ext'] = mimeTypeData[1];
 
-    // imageUploadRequest.files.add(file);
+    imageUploadRequest.files.add(file);
     imageUploadRequest.fields['id_user'] = "4370";
     imageUploadRequest.fields['nama'] = "dedi";
     imageUploadRequest.fields['instansi'] = "kominfo";
+    imageUploadRequest.fields['judul'] = tf_judul.text;
     imageUploadRequest.fields['what'] = tf_what.text;
     imageUploadRequest.fields['when'] = tf_when.text;
     imageUploadRequest.fields['where'] = tf_where.text;
     imageUploadRequest.fields['who'] = tf_who.text;
     imageUploadRequest.fields['why'] = tf_why.text;
     imageUploadRequest.fields['how'] = tf_how.text;
-    imageUploadRequest.fields['gambar1'] = "gbr1";
-    imageUploadRequest.fields['gambar2'] = "gbr2";
-    imageUploadRequest.fields['gambar3'] = "gbr3";
-    imageUploadRequest.fields['gambar4'] = "gbr4";
+
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200) {
+        return null;
+      }
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      String code = responseData['code'];
+      if (code == 1) {
+        _resetState();
+        return responseData;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }*/
+
+   Future<Map<String, dynamic>> _uploadImage(File image) async {
+    setState(() {
+      pr.show();
+    });
+
+    final mimeTypeData =
+        lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    // Intilize the multipart request
+    final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
+
+    // Attach the file in the request
+    final file = await http.MultipartFile.fromPath(
+        'gbr1', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    // Explicitly pass the extension of the image with request body
+    // Since image_picker has some bugs due which it mixes up
+    // image extension with file name like this filenamejpge
+    // Which creates some problem at the server side to manage
+    // or verify the file extension
+
+//    imageUploadRequest.fields['ext'] = mimeTypeData[1];
+
+    imageUploadRequest.files.add(file);
+    //imageUploadRequest.files.add(file);
+    imageUploadRequest.fields['id_user'] = "4370";
+    imageUploadRequest.fields['nama'] = "dedi";
+    imageUploadRequest.fields['instansi'] = "kominfo";
+    imageUploadRequest.fields['judul'] = tf_judul.text;
+    imageUploadRequest.fields['what'] = tf_what.text;
+    imageUploadRequest.fields['when'] = tf_when.text;
+    imageUploadRequest.fields['where'] = tf_where.text;
+    imageUploadRequest.fields['who'] = tf_who.text;
+    imageUploadRequest.fields['why'] = tf_why.text;
+    imageUploadRequest.fields['how'] = tf_how.text;
 
     try {
       final streamedResponse = await imageUploadRequest.send();
@@ -346,13 +471,15 @@ class _BuatDataState extends State<BuatData> {
     String where = tf_where.text;
     String when = tf_when.text;
     String what = tf_what.text;
+
     if (how != '' &&
         why != '' &&
         who != '' &&
         where != '' &&
         when != '' &&
-        what != '') {
-      final Map<String, dynamic> response = await _uploadImage();
+        what != '' &&
+        _image != null) {
+      final Map<String, dynamic> response = await _uploadImage(_image);
 
       if (response == null) {
         pr.hide();
