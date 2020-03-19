@@ -8,6 +8,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wardes/ImageUploadModel.dart';
 
 void main() => runApp(BuatData());
@@ -23,6 +24,12 @@ class _BuatDataState extends State<BuatData> {
   Future<File> _imageFile;
   File _image;
   File _image2;
+  File _image3;
+  File _image4;
+
+  String nama;
+  String instansi;
+  String id_user;
 
   TextEditingController tf_what = new TextEditingController();
   TextEditingController tf_when = new TextEditingController();
@@ -32,13 +39,27 @@ class _BuatDataState extends State<BuatData> {
   TextEditingController tf_how = new TextEditingController();
   TextEditingController tf_judul = new TextEditingController();
 
+  Future getDataPengguna() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    id_user = prefs.getString('id_user');
+    nama = prefs.getString('nama_lengkap');
+    instansi = prefs.getString('daerah');
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getDataPengguna();
+  }
+
   @override
   Widget build(BuildContext context) {
     pr = new ProgressDialog(context, type: ProgressDialogType.Normal);
 
     //Optional
     pr.style(
-      message: 'Please wait...',
+      message: 'Mohon Tunggu...',
       borderRadius: 10.0,
       backgroundColor: Colors.white,
       progressWidget: CircularProgressIndicator(),
@@ -62,7 +83,8 @@ class _BuatDataState extends State<BuatData> {
             child: new Column(
               children: <Widget>[
                 new TextField(
-                  maxLines: 2,
+                  minLines: 1,
+                  maxLines: 5,
                   controller: tf_judul,
                   decoration: new InputDecoration(
                       hintText: "Masukkan judul atas informasi yang diberikan",
@@ -74,7 +96,8 @@ class _BuatDataState extends State<BuatData> {
                   padding: new EdgeInsets.only(top: 20.0),
                 ),
                 new TextField(
-                  maxLines: 2,
+                  minLines: 1,
+                  maxLines: 5,
                   controller: tf_what,
                   decoration: new InputDecoration(
                       hintText: "Topik atau tema yang akan dijadikan tulisan",
@@ -87,7 +110,8 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 new TextField(
                   controller: tf_when,
-                  maxLines: 2,
+                  minLines: 1,
+                  maxLines: 5,
                   decoration: new InputDecoration(
                       hintText: "Periode waktu dari what diatas",
                       labelText: "When (kapan)",
@@ -99,7 +123,8 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 new TextField(
                   controller: tf_where,
-                  maxLines: 2,
+                  minLines: 1,
+                  maxLines: 5,
                   decoration: new InputDecoration(
                       hintText:
                           "Dimana kejadian yang terhubung dengan what diatas",
@@ -112,7 +137,8 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 new TextField(
                   controller: tf_who,
-                  maxLines: 2,
+                 minLines: 1,
+                  maxLines: 5,
                   decoration: new InputDecoration(
                       hintText: "Siapa berkaitan dengan orang atau lembaga",
                       labelText: "Who (siapa)",
@@ -124,6 +150,8 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 new TextField(
                   controller: tf_why,
+                  minLines: 1,
+                  maxLines: 5,
                   decoration: new InputDecoration(
                       hintText: "Bagian yang menjelaskan tema tulisan",
                       labelText: "Why (mengapa)",
@@ -135,7 +163,8 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 new TextField(
                   controller: tf_how,
-                  maxLines: 3,
+                  minLines: 1,
+                  maxLines: 5,
                   decoration: new InputDecoration(
                       hintText: "Menjelaskan tema yang dipilih",
                       labelText: "How (bagaimana)",
@@ -143,73 +172,180 @@ class _BuatDataState extends State<BuatData> {
                           borderRadius: new BorderRadius.circular(20.0))),
                 ),
                 //buildGridView(),
-                new Container(
-                  margin: EdgeInsets.only(top: 20),
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: <Widget>[
-                      Stack(
-                        children: <Widget>[
-                          CircleAvatar(
-                            backgroundImage: _image == null
-                                ? NetworkImage(
-                                    'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
-                                : FileImage(_image),
-                            radius: 50.0,
-                          ),
-                          InkWell(
-                            onTap: _onAlertPress,
-                            child: Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(40.0),
-                                    color: Colors.black),
-                                margin: EdgeInsets.only(left: 70, top: 70),
-                                child: Icon(
-                                  Icons.photo_camera,
-                                  size: 25,
-                                  color: Colors.white,
-                                )),
-                          ),
-                        ],
-                      ),
-                      Text('Tambahkan Gambar',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                           Stack(
-                        children: <Widget>[
-                          CircleAvatar(
-                            backgroundImage: _image2 == null
-                                ? NetworkImage(
-                                    'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
-                                : FileImage(_image2),
-                            radius: 50.0,
-                          ),
-                          InkWell(
-                            onTap: _onAlertPress2,
-                            child: Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(40.0),
-                                    color: Colors.black),
-                                margin: EdgeInsets.only(left: 70, top: 70),
-                                child: Icon(
-                                  Icons.photo_camera,
-                                  size: 25,
-                                  color: Colors.white,
-                                )),
-                          ),
-                        ],
-                      ),
-                      Text('Tambahkan Gambar',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: new Container(
+                    margin: EdgeInsets.only(top: 20),
+                    alignment: Alignment.center,
+                    child: Row(
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage: _image == null
+                                      ? NetworkImage(
+                                          'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                      : FileImage(_image),
+                                  radius: 50.0,
+                                ),
+                                InkWell(
+                                  onTap: _onAlertPress,
+                                  child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(40.0),
+                                          color: Colors.black),
+                                      margin:
+                                          EdgeInsets.only(left: 70, top: 70),
+                                      child: Icon(
+                                        Icons.photo_camera,
+                                        size: 25,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ],
+                            ),
+                            Text('Tambahkan Gambar',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.0)),
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage: _image2 == null
+                                      ? NetworkImage(
+                                          'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                      : FileImage(_image2),
+                                  radius: 50.0,
+                                ),
+                                InkWell(
+                                  onTap: _onAlertPress2,
+                                  child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(40.0),
+                                          color: Colors.black),
+                                      margin:
+                                          EdgeInsets.only(left: 70, top: 70),
+                                      child: Icon(
+                                        Icons.photo_camera,
+                                        size: 25,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ],
+                            ),
+                            Text('Tambahkan Gambar',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.0)),
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage: _image3 == null
+                                      ? NetworkImage(
+                                          'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                      : FileImage(_image3),
+                                  radius: 50.0,
+                                ),
+                                InkWell(
+                                  onTap: _onAlertPress3,
+                                  child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(40.0),
+                                          color: Colors.black),
+                                      margin:
+                                          EdgeInsets.only(left: 70, top: 70),
+                                      child: Icon(
+                                        Icons.photo_camera,
+                                        size: 25,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ],
+                            ),
+                            Text('Tambahkan Gambar',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.0)),
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                CircleAvatar(
+                                  backgroundImage: _image4 == null
+                                      ? NetworkImage(
+                                          'https://git.unilim.fr/assets/no_group_avatar-4a9d347a20d783caee8aaed4a37a65930cb8db965f61f3b72a2e954a0eaeb8ba.png')
+                                      : FileImage(_image4),
+                                  radius: 50.0,
+                                ),
+                                InkWell(
+                                  onTap: _onAlertPress4,
+                                  child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(40.0),
+                                          color: Colors.black),
+                                      margin:
+                                          EdgeInsets.only(left: 70, top: 70),
+                                      child: Icon(
+                                        Icons.photo_camera,
+                                        size: 25,
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ],
+                            ),
+                            Text('Tambahkan Gambar',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.0)),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 30),
                 RaisedButton(
                   onPressed: () {
-                    _startUploading();
+                    String how = tf_how.text;
+                    String why = tf_why.text;
+                    String who = tf_who.text;
+                    String where = tf_where.text;
+                    String when = tf_when.text;
+                    String what = tf_what.text;
+
+                    if (how != '' &&
+                        why != '' &&
+                        who != '' &&
+                        where != '' &&
+                        when != '' &&
+                        what != '' &&
+                        _image != null) {
+                      _startUploading();
+                    } else {
+                      messageAllertGagal(
+                          'Data tidak boleh ada yang kosong', 'Gagal');
+                    }
                   },
                   textColor: Colors.white,
                   padding: const EdgeInsets.all(0.0),
@@ -252,19 +388,12 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 onPressed: getGalleryImage,
               ),
-              CupertinoDialogAction(
-                isDefaultAction: true,
-                child: Column(
-                  children: <Widget>[
-                    Text('Kamera'),
-                  ],
-                ),
-                onPressed: getCameraImage,
-              ),
+              
             ],
           );
         });
   }
+
   void _onAlertPress2() async {
     showDialog(
         context: context,
@@ -280,22 +409,56 @@ class _BuatDataState extends State<BuatData> {
                 ),
                 onPressed: getGalleryImage2,
               ),
+              
+            ],
+          );
+        });
+  }
+
+  void _onAlertPress3() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            actions: [
               CupertinoDialogAction(
                 isDefaultAction: true,
                 child: Column(
                   children: <Widget>[
-                    Text('Kamera'),
+                    Text('Galeri'),
                   ],
                 ),
-                onPressed: getCameraImage2,
+                onPressed: getGalleryImage3,
               ),
+              
+            ],
+          );
+        });
+  }
+
+  void _onAlertPress4() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new CupertinoAlertDialog(
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                child: Column(
+                  children: <Widget>[
+                    Text('Galeri'),
+                  ],
+                ),
+                onPressed: getGalleryImage4,
+              ),
+              
             ],
           );
         });
   }
 
   Future getCameraImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    var image = await ImagePicker.pickImage(source: ImageSource.camera, imageQuality: 50);
 
     setState(() {
       _image = image;
@@ -304,7 +467,7 @@ class _BuatDataState extends State<BuatData> {
   }
 
   Future getGalleryImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery,  imageQuality: 50);
 
     setState(() {
       _image = image;
@@ -312,7 +475,7 @@ class _BuatDataState extends State<BuatData> {
     });
   }
 
-Future getCameraImage2() async {
+  Future getCameraImage2() async {
     var image2 = await ImagePicker.pickImage(source: ImageSource.camera);
 
     setState(() {
@@ -322,7 +485,7 @@ Future getCameraImage2() async {
   }
 
   Future getGalleryImage2() async {
-    var image2 = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var image2 = await ImagePicker.pickImage(source: ImageSource.gallery,  imageQuality: 50);
 
     setState(() {
       _image2 = image2;
@@ -330,6 +493,41 @@ Future getCameraImage2() async {
     });
   }
 
+  Future getCameraImage3() async {
+    var image3 = await ImagePicker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      _image3 = image3;
+      Navigator.pop(context);
+    });
+  }
+
+  Future getGalleryImage3() async {
+    var image3 = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+
+    setState(() {
+      _image3 = image3;
+      Navigator.pop(context);
+    });
+  }
+
+  Future getCameraImage4() async {
+    var image4 = await ImagePicker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      _image4 = image4;
+      Navigator.pop(context);
+    });
+  }
+
+  Future getGalleryImage4() async {
+    var image4 = await ImagePicker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+
+    setState(() {
+      _image4 = image4;
+      Navigator.pop(context);
+    });
+  }
 
   void getDataConroller() {
     AlertDialog alertDialog = new AlertDialog(
@@ -351,8 +549,9 @@ Future getCameraImage2() async {
 
   Uri apiUrl = Uri.parse(
       'http://wardes.pasamanbaratkab.go.id/api_android/post_data.php');
-/*
-  Future<Map<String, dynamic>> _uploadImage(File image) async {
+
+  Future<Map<String, dynamic>> _uploadImage(
+      File image, File image2, File image3, File image4) async {
     setState(() {
       pr.show();
     });
@@ -360,24 +559,36 @@ Future getCameraImage2() async {
     final mimeTypeData =
         lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
 
-    // Intilize the multipart request
+    final mimeTypeData2 =
+        lookupMimeType(image2.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final mimeTypeData3 =
+        lookupMimeType(image3.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final mimeTypeData4 =
+        lookupMimeType(image4.path, headerBytes: [0xFF, 0xD8]).split('/');
+
     final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
 
-    // Attach the file in the request
     final file = await http.MultipartFile.fromPath('gbr1', image.path,
         contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
-    // Explicitly pass the extension of the image with request body
-    // Since image_picker has some bugs due which it mixes up
-    // image extension with file name like this filenamejpge
-    // Which creates some problem at the server side to manage
-    // or verify the file extension
 
-//    imageUploadRequest.fields['ext'] = mimeTypeData[1];
+    final file2 = await http.MultipartFile.fromPath('gbr2', image2.path,
+        contentType: MediaType(mimeTypeData2[0], mimeTypeData2[1]));
+
+    final file3 = await http.MultipartFile.fromPath('gbr3', image3.path,
+        contentType: MediaType(mimeTypeData3[0], mimeTypeData3[1]));
+
+    final file4 = await http.MultipartFile.fromPath('gbr4', image4.path,
+        contentType: MediaType(mimeTypeData4[0], mimeTypeData4[1]));
 
     imageUploadRequest.files.add(file);
-    imageUploadRequest.fields['id_user'] = "4370";
-    imageUploadRequest.fields['nama'] = "dedi";
-    imageUploadRequest.fields['instansi'] = "kominfo";
+    imageUploadRequest.files.add(file2);
+    imageUploadRequest.files.add(file3);
+    imageUploadRequest.files.add(file4);
+    imageUploadRequest.fields['id_user'] = id_user;
+    imageUploadRequest.fields['nama'] = nama;
+    imageUploadRequest.fields['instansi'] = instansi;
     imageUploadRequest.fields['judul'] = tf_judul.text;
     imageUploadRequest.fields['what'] = tf_what.text;
     imageUploadRequest.fields['when'] = tf_when.text;
@@ -402,9 +613,9 @@ Future getCameraImage2() async {
       print(e);
       return null;
     }
-  }*/
+  }
 
-   Future<Map<String, dynamic>> _uploadImage(File image) async {
+  Future<Map<String, dynamic>> _uploadImage1(File image) async {
     setState(() {
       pr.show();
     });
@@ -412,26 +623,122 @@ Future getCameraImage2() async {
     final mimeTypeData =
         lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
 
-    // Intilize the multipart request
     final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
 
-    // Attach the file in the request
-    final file = await http.MultipartFile.fromPath(
-        'gbr1', image.path,
+    final file = await http.MultipartFile.fromPath('gbr1', image.path,
         contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
-    // Explicitly pass the extension of the image with request body
-    // Since image_picker has some bugs due which it mixes up
-    // image extension with file name like this filenamejpge
-    // Which creates some problem at the server side to manage
-    // or verify the file extension
-
-//    imageUploadRequest.fields['ext'] = mimeTypeData[1];
 
     imageUploadRequest.files.add(file);
-    //imageUploadRequest.files.add(file);
-    imageUploadRequest.fields['id_user'] = "4370";
-    imageUploadRequest.fields['nama'] = "dedi";
-    imageUploadRequest.fields['instansi'] = "kominfo";
+
+    imageUploadRequest.fields['id_user'] = id_user;
+    imageUploadRequest.fields['nama'] = nama;
+    imageUploadRequest.fields['instansi'] = instansi;
+    imageUploadRequest.fields['judul'] = tf_judul.text;
+    imageUploadRequest.fields['what'] = tf_what.text;
+    imageUploadRequest.fields['when'] = tf_when.text;
+    imageUploadRequest.fields['where'] = tf_where.text;
+    imageUploadRequest.fields['who'] = tf_who.text;
+    imageUploadRequest.fields['why'] = tf_why.text;
+    imageUploadRequest.fields['how'] = tf_how.text;
+
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200) {
+        return null;
+      }
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      String code = responseData['code'];
+      if (code == 1) {
+        _resetState();
+        return responseData;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> _uploadImage2(File image, File image2) async {
+    setState(() {
+      pr.show();
+    });
+
+    final mimeTypeData =
+        lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final mimeTypeData2 =
+        lookupMimeType(image2.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
+
+    final file = await http.MultipartFile.fromPath('gbr1', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+
+    final file2 = await http.MultipartFile.fromPath('gbr2', image2.path,
+        contentType: MediaType(mimeTypeData2[0], mimeTypeData2[1]));
+
+    imageUploadRequest.files.add(file);
+    imageUploadRequest.files.add(file2);
+
+    imageUploadRequest.fields['id_user'] = id_user;
+    imageUploadRequest.fields['nama'] = nama;
+    imageUploadRequest.fields['instansi'] = instansi;
+    imageUploadRequest.fields['judul'] = tf_judul.text;
+    imageUploadRequest.fields['what'] = tf_what.text;
+    imageUploadRequest.fields['when'] = tf_when.text;
+    imageUploadRequest.fields['where'] = tf_where.text;
+    imageUploadRequest.fields['who'] = tf_who.text;
+    imageUploadRequest.fields['why'] = tf_why.text;
+    imageUploadRequest.fields['how'] = tf_how.text;
+
+    try {
+      final streamedResponse = await imageUploadRequest.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      if (response.statusCode != 200) {
+        return null;
+      }
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      String code = responseData['code'];
+      if (code == 1) {
+        _resetState();
+        return responseData;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> _uploadImage3(
+      File image, File image2, File image3) async {
+    setState(() {
+      pr.show();
+    });
+
+    final mimeTypeData =
+        lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
+    final mimeTypeData2 =
+        lookupMimeType(image2.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final mimeTypeData3 =
+        lookupMimeType(image3.path, headerBytes: [0xFF, 0xD8]).split('/');
+
+    final imageUploadRequest = http.MultipartRequest('POST', apiUrl);
+
+    final file = await http.MultipartFile.fromPath('gbr1', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    final file2 = await http.MultipartFile.fromPath('gbr2', image2.path,
+        contentType: MediaType(mimeTypeData2[0], mimeTypeData2[1]));
+    final file3 = await http.MultipartFile.fromPath('gbr3', image3.path,
+        contentType: MediaType(mimeTypeData3[0], mimeTypeData3[1]));
+
+    imageUploadRequest.files.add(file);
+    imageUploadRequest.files.add(file2);
+    imageUploadRequest.files.add(file3);
+    imageUploadRequest.fields['id_user'] = id_user;
+    imageUploadRequest.fields['nama'] = nama;
+    imageUploadRequest.fields['instansi'] = instansi;
     imageUploadRequest.fields['judul'] = tf_judul.text;
     imageUploadRequest.fields['what'] = tf_what.text;
     imageUploadRequest.fields['when'] = tf_when.text;
@@ -472,18 +779,57 @@ Future getCameraImage2() async {
     String when = tf_when.text;
     String what = tf_what.text;
 
-    if (how != '' &&
+    /* if (how != '' &&
         why != '' &&
         who != '' &&
         where != '' &&
         when != '' &&
         what != '' &&
         _image != null) {
-      final Map<String, dynamic> response = await _uploadImage(_image);
+      final Map<String, dynamic> response =
+          await _uploadImage(_image, _image2, _image3, _image4);
 
       if (response == null) {
         pr.hide();
-        messageAllert('Data Berhasil Dikirim', 'Success');
+        messageAllert('Data Berhasil Dikirim', 'Sukses');
+      }
+    }  else {
+      messageAllertGagal('Data tidak boleh ada yang kosong', 'Gagal');
+    }*/
+
+    if (_image2 == null && _image3 == null && _image4 == null) {
+      final Map<String, dynamic> response = await _uploadImage1(_image);
+
+      if (response == null) {
+        pr.hide();
+        messageAllert('Data Berhasil Dikirim', 'Sukses');
+      }
+    } else if (_image3 == null && _image4 == null) {
+      final Map<String, dynamic> response =
+          await _uploadImage2(_image, _image2);
+
+      if (response == null) {
+        pr.hide();
+        messageAllert('Data Berhasil Dikirim', 'Sukses');
+      }
+    } else if (_image4 == null) {
+      final Map<String, dynamic> response =
+          await _uploadImage3(_image, _image2, _image3);
+
+      if (response == null) {
+        pr.hide();
+        messageAllert('Data Berhasil Dikirim', 'Sukses');
+      }
+    } else if (_image != null &&
+        _image2 != null &&
+        _image3 != null &&
+        _image4 != null) {
+      final Map<String, dynamic> response =
+          await _uploadImage(_image, _image2, _image3, _image4);
+
+      if (response == null) {
+        pr.hide();
+        messageAllert('Data Berhasil Dikirim', 'Sukses');
       }
     } else {
       messageAllertGagal('Data tidak boleh ada yang kosong', 'Gagal');

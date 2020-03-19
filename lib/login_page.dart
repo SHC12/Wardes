@@ -1,17 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wardes/Home.dart';
+import 'package:wardes/daftar.dart';
 import 'package:wardes/login_result.dart';
 
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-
 
 class _LoginPageState extends State<LoginPage> {
   bool _isSelected = false;
@@ -58,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     Map data = {'username': username, 'password': password};
     var jsonResponse = null;
     var response = await http.post(
-        "http://simpel.pasamanbaratkab.go.id/api_android/simaya/model_login.php",
+        "http://wardes.pasamanbaratkab.go.id/api_android/login_user.php",
         body: data);
 
     jsonResponse = json.decode(response.body);
@@ -67,35 +68,65 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false;
 
       if (jsonResponse != null) {
-      int success = jsonResponse['success'];
+        int success = jsonResponse['status'];
 
-      
-      if (success == 1) {
-        sharedPreferences.setString("message", jsonResponse['message']);
-        sharedPreferences.setString("username", jsonResponse['username']);
-        sharedPreferences.setString("id_instansi", jsonResponse['id_instansi']);
-        sharedPreferences.setString(
-            "nama_instansi", jsonResponse['nama_instansi']);
-        sharedPreferences.setString(
-            "id_jenjang_jabatan", jsonResponse['id_jenjang_jabatan']);
-        sharedPreferences.setString("id_groups", jsonResponse['id_groups']);
-        sharedPreferences.setString("id_kategori", jsonResponse['id_kategori']);
-        sharedPreferences.setString("id_user", jsonResponse['id_user']);
-        sharedPreferences.setString(
-            "username_admin", jsonResponse['username_admin']);
-        sharedPreferences.setString(
-            "nama_lengkap", jsonResponse['nama_lengkap']);
+        if (success == 1) {
+          setState(() {
+            Fluttertoast.showToast(
+                msg: "Berhasil login",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIos: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0);
+            //   _isLoading = false;
+          });
+          sharedPreferences.setString("message", jsonResponse['message']);
+          sharedPreferences.setString("daerah", jsonResponse['daerah']);
+          sharedPreferences.setString("username", jsonResponse['username']);
 
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
-            (Route<dynamic> route) => false);
+          sharedPreferences.setString("id_user", jsonResponse['id_user']);
+
+          sharedPreferences.setString(
+              "nama_lengkap", jsonResponse['nama_lengkap']);
+          print(jsonResponse['daerah']);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => HomeScreen()),
+              (Route<dynamic> route) => false);
+        } else if (success == 2) {
+          setState(() {
+            Fluttertoast.showToast(
+                msg:
+                    "Akun anda belum diaktifkan, silahkan hubungi admin OPD Anda",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIos: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0);
+
+            //_isLoading = false;
+          });
+        } else {
+          setState(() {
+            Fluttertoast.showToast(
+                msg: "Username atau Kata Sandi Salah",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIos: 1,
+                backgroundColor: Colors.blue,
+                textColor: Colors.white,
+                fontSize: 16.0);
+
+            //_isLoading = false;
+          });
+        }
+      } else {
+        print(response.body);
       }
-    } else {
-      print(response.body);
-      
-    }
     });
-    
   }
 
   @override
@@ -135,11 +166,11 @@ class _LoginPageState extends State<LoginPage> {
                               width: ScreenUtil.getInstance().setWidth(110),
                               height: ScreenUtil.getInstance().setHeight(110),
                             ),
-                            Text("Wartawan Desa",
+                            Text("Wartawan Tuah Basamo",
                                 style: TextStyle(
                                     fontFamily: "Poppins-Bold",
                                     fontSize:
-                                        ScreenUtil.getInstance().setSp(46),
+                                        ScreenUtil.getInstance().setSp(36),
                                     letterSpacing: .6,
                                     fontWeight: FontWeight.bold))
                           ],
@@ -148,6 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: ScreenUtil.getInstance().setHeight(180),
                         ),
                         //FormCard(),
+
                         Container(
                           width: double.infinity,
                           height: ScreenUtil.getInstance().setHeight(500),
@@ -222,7 +254,6 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            
                             Row(
                               children: <Widget>[
                                 SizedBox(
@@ -233,44 +264,94 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ],
                             ),
-                            InkWell(
-                              child: Container(
-                                width: ScreenUtil.getInstance().setWidth(330),
-                                height: ScreenUtil.getInstance().setHeight(100),
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(colors: [
-                                      Color(0xFF17ead9),
-                                      Color(0xFF6078ea)
-                                    ]),
-                                    borderRadius: BorderRadius.circular(6.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color:
-                                              Color(0xFF6078ea).withOpacity(.3),
-                                          offset: Offset(0.0, 8.0),
-                                          blurRadius: 8.0)
-                                    ]),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () {
-                                      /*Navigator.pushReplacement(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return HomePage();
-                                }));*/
-                                setState(() {
-                                  _isLoading = true;
-                                });
-
-                                      signIn(c_username.text, c_password.text);
-                                    },
-                                    child: Center(
-                                      child: Text("MASUK",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: "Poppins-Bold",
-                                              fontSize: 18,
-                                              letterSpacing: 1.0)),
+                            Flexible(
+                              flex: 1,
+                              child: InkWell(
+                                child: Container(
+                                  width: ScreenUtil.getInstance().setWidth(330),
+                                  height:
+                                      ScreenUtil.getInstance().setHeight(100),
+                                  decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                        Color(0xFF17ead9),
+                                        Color(0xFF6078ea)
+                                      ]),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Color(0xFF6078ea)
+                                                .withOpacity(.3),
+                                            offset: Offset(0.0, 8.0),
+                                            blurRadius: 8.0)
+                                      ]),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        /*Navigator.pushReplacement(context,
+                                      MaterialPageRoute(builder: (context) {
+                                    return HomePage();
+                                  }));*/
+                                        setState(() {
+                                          _isLoading = true;
+                                        });
+                                        signIn(
+                                            c_username.text, c_password.text);
+                                      },
+                                      child: Center(
+                                        child: Text("MASUK",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: "Poppins-Bold",
+                                                fontSize: 18,
+                                                letterSpacing: 1.0)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: ScreenUtil.getInstance().setWidth(35),
+                            ),
+                            Flexible(
+                              flex: 1,
+                              child: InkWell(
+                                child: Container(
+                                  width: ScreenUtil.getInstance().setWidth(330),
+                                  height:
+                                      ScreenUtil.getInstance().setHeight(100),
+                                  decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                        Color(0xFF6078ea),
+                                        Color(0xFF17ead9)
+                                      ]),
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Color(0xFF6078ea)
+                                                .withOpacity(.3),
+                                            offset: Offset(0.0, 8.0),
+                                            blurRadius: 8.0)
+                                      ]),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(context,
+                                            MaterialPageRoute(
+                                                builder: (context) {
+                                          return Daftar();
+                                        }));
+                                      },
+                                      child: Center(
+                                        child: Text("DAFTAR",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: "Poppins-Bold",
+                                                fontSize: 18,
+                                                letterSpacing: 1.0)),
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -11,10 +11,10 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.2.0+3
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -36,12 +36,20 @@ dependencies:
   progress_dialog: ^1.2.0
   mime: ^0.9.6+3
   http_parser: ^3.1.3
+  fluttertoast: ^3.1.3
+  
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.7.3"
 
+flutter_icons:
+  android: "launcher_icon" 
+  ios: true
+  image_path: "assets/logo3.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -58,6 +66,7 @@ flutter:
     - assets/image_01.png
     - assets/image_02.png
     - assets/logo.png
+    - assets/images/icon_wardes.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

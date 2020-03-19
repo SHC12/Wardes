@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wardes/Home.dart';
 import 'package:wardes/login_page.dart';
+import 'package:wardes/splash_screen.dart';
 
 
 Future<void> main() async {
@@ -12,5 +13,6 @@ Future<void> main() async {
   
   print(email);
   runApp(
-    MaterialApp(home: email == null ? LoginPage() : HomeScreen()));
+   // MaterialApp(home: email == null ? LoginPage() : HomeScreen()));
+    MaterialApp(home: SplashScreen()));
 }
